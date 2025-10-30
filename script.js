@@ -116,7 +116,7 @@ xmlContent = xmlContent
             cabecera += `\tDISTRIBUCION Y ALMACENAJE FLETE\t${tarifaImporte}`;
         }
         if (descuentoLinea) {
-            cabecera += `\tDESCUENTOS DEL PROVEEDOR\t${descuentoLinea}`;
+            cabecera += `\t DESCUENTO EN FLETES\t${descuentoLinea}`;
         }
 
         const contenidoFinal = [cabecera, ...detalles].join('\n');
