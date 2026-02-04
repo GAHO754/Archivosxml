@@ -36,9 +36,11 @@ document.getElementById('processButton').addEventListener('click', () => {
       rfcEmisor = '001488';
     }
     // ===== CENTROCOSTO => Número de tienda =====
+   // ===== CENTROCOSTO => Número de tienda =====
     let numeroTienda = '000000';
     let centroCostoAttr = null;
 
+    // Buscamos el atributo CENTROCOSTO en todos los nodos (Addenda)
     const allNodes = xmlDoc.getElementsByTagName('*');
     for (let i = 0; i < allNodes.length; i++) {
       const attrs = allNodes[i].attributes;
@@ -53,23 +55,16 @@ document.getElementById('processButton').addEventListener('click', () => {
     }
 
     if (centroCostoAttr) {
-      // Intentamos primero el formato con guion: 4142-0059
-      const matchConGuion = centroCostoAttr.match(/(\d{4})-(\d{4})/);
-      
-      if (matchConGuion) {
-        const parte1 = matchConGuion[1].substring(2); // Toma "42"
-        const parte2 = matchConGuion[2];             // Toma "0059"
-        numeroTienda = `${parte1}${parte2}`.padStart(6, '0');
-      } 
-      // Si no tiene guion pero tiene 8 dígitos (ej: 41420059)
-      else if (centroCostoAttr.length === 8 && /^\d+$/.test(centroCostoAttr)) {
-        const parte1 = centroCostoAttr.substring(2, 4); // Toma "42" (posición 2 y 3)
-        const parte2 = centroCostoAttr.substring(4);    // Toma "0059" (del 4 al final)
-        numeroTienda = `${parte1}${parte2}`.padStart(6, '0');
-      }
-      // Si es un número diferente, lo tomamos tal cual (limpiando a 6 dígitos)
-      else {
-        numeroTienda = centroCostoAttr.slice(-6).padStart(6, '0');
+      // Eliminamos cualquier guion para estandarizar el dato
+      const limpio = centroCostoAttr.replace('-', '');
+
+      if (limpio.length === 8) {
+        // Si tiene 8 dígitos (ej. 41420059):
+        // Saltamos los primeros dos ("41") y tomamos los siguientes 6 ("420059")
+        numeroTienda = limpio.substring(2).padStart(6, '0');
+      } else {
+        // Si tiene otra longitud, tomamos los últimos 6 por seguridad
+        numeroTienda = limpio.slice(-6).padStart(6, '0');
       }
     } else {
       alert('⚠️ No se encontró el atributo CENTROCOSTO. Se usará 000000.');
