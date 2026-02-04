@@ -35,7 +35,6 @@ document.getElementById('processButton').addEventListener('click', () => {
     if (rfcEmisor === 'ACM040107U93') {
       rfcEmisor = '001488';
     }
-
     // ===== CENTROCOSTO => Número de tienda =====
     let numeroTienda = '000000';
     let centroCostoAttr = null;
@@ -54,11 +53,23 @@ document.getElementById('processButton').addEventListener('click', () => {
     }
 
     if (centroCostoAttr) {
-      const match = centroCostoAttr.match(/(\d{4})-(\d{4})/);
-      if (match) {
-        const parte1 = match[1].substring(2);
-        const parte2 = match[2];
+      // Intentamos primero el formato con guion: 4142-0059
+      const matchConGuion = centroCostoAttr.match(/(\d{4})-(\d{4})/);
+      
+      if (matchConGuion) {
+        const parte1 = matchConGuion[1].substring(2); // Toma "42"
+        const parte2 = matchConGuion[2];             // Toma "0059"
         numeroTienda = `${parte1}${parte2}`.padStart(6, '0');
+      } 
+      // Si no tiene guion pero tiene 8 dígitos (ej: 41420059)
+      else if (centroCostoAttr.length === 8 && /^\d+$/.test(centroCostoAttr)) {
+        const parte1 = centroCostoAttr.substring(2, 4); // Toma "42" (posición 2 y 3)
+        const parte2 = centroCostoAttr.substring(4);    // Toma "0059" (del 4 al final)
+        numeroTienda = `${parte1}${parte2}`.padStart(6, '0');
+      }
+      // Si es un número diferente, lo tomamos tal cual (limpiando a 6 dígitos)
+      else {
+        numeroTienda = centroCostoAttr.slice(-6).padStart(6, '0');
       }
     } else {
       alert('⚠️ No se encontró el atributo CENTROCOSTO. Se usará 000000.');
@@ -137,3 +148,4 @@ document.getElementById('processButton').addEventListener('click', () => {
 
   reader.readAsText(file);
 });
+
